@@ -43,20 +43,10 @@ python -m pip install requests</code></pre>
 <h2 id="section-5">2. Create your two free accounts</h2>
 <p><strong>Groq (Free plan).</strong> Create an account on <code>https://console.groq.com</code>, open "API Keys", create one key. Stay on the Free plan: do not add a payment method.</p>
 <p><strong>OpenRouter.</strong> Create an account on <code>https://openrouter.ai</code>, open "Keys", create one key. Do not buy credits: the assignment only uses models whose identifier ends with <code>:free</code> (exact list in step 4). Use the complete identifier, including the suffix, through the supplied scripts. The scripts restrict OpenRouter input and output prices to zero.</p>
-<<<<<<< HEAD
 <p>Copy <code>kit-td1/.env.exemple</code> to <code>kit-td1/.env</code> and fill in both keys. The Python scripts read this file directly, so the same setup works on macOS, Linux and Windows PowerShell. Never commit <code>.env</code>, paste a key in a notebook cell, or publish a key.</p>
 <pre><code># kit-td1/.env
 GROQ_API_KEY=gsk_...
 OPENROUTER_API_KEY=sk-or-v1-...</code></pre>
-=======
-<p>Store both keys as local environment variables. Never write a key in a file of the repository, never paste it in a notebook cell, never commit it.</p>
-<pre><code># Linux and macOS
-export GROQ_API_KEY="gsk_..."
-export OPENROUTER_API_KEY="sk-or-v1-..."</code></pre>
-<p><strong>Windows PowerShell</strong></p>
-<pre><code>$env:GROQ_API_KEY = "gsk_..."
-$env:OPENROUTER_API_KEY = "sk-or-v1-..."</code></pre>
->>>>>>> 4efc410 (Premier commit)
 <h2 id="section-6">3. Get the TD kit</h2>
 <p>Get the folder <code>kit-td1</code> (or its archive) your instructor shares for the session and keep its files together, without renaming or moving any of them:</p>
 <ul>

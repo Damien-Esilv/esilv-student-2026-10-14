@@ -49,7 +49,6 @@ identifier ends with `:free` (exact list in step 4). Use the complete
 identifier, including the suffix, through the supplied scripts. The scripts
 restrict OpenRouter input and output prices to zero.
 
-<<<<<<< HEAD
 Copy `kit-td1/.env.exemple` to `kit-td1/.env` and fill in both keys. The
 Python scripts read this file directly, so the same setup works on macOS,
 Linux and Windows PowerShell. Never commit `.env`, paste a key in a notebook
@@ -59,23 +58,6 @@ cell, or publish a key.
 # kit-td1/.env
 GROQ_API_KEY=gsk_...
 OPENROUTER_API_KEY=sk-or-v1-...
-=======
-Store both keys as local environment variables. Never write a key in a file
-of the repository, never paste it in a notebook cell, never commit it.
-
-```bash
-# Linux and macOS
-export GROQ_API_KEY="gsk_..."
-export OPENROUTER_API_KEY="sk-or-v1-..."
-
-```
-
-**Windows PowerShell**
-
-```powershell
-$env:GROQ_API_KEY = "gsk_..."
-$env:OPENROUTER_API_KEY = "sk-or-v1-..."
->>>>>>> 4efc410 (Premier commit)
 ```
 
 ## 3. Get the TD kit
