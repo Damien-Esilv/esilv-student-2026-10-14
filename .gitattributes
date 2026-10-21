@@ -1,0 +1,2 @@
+kit-td1/data/*.csv text eol=lf
+kit-td1/schema.sql text eol=lf
