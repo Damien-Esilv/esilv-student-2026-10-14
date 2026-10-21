@@ -14,6 +14,7 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 | `check_access.py` | Checks your Python version, the hash of the database and the access to every authorised model; one OK or KO per line. |
 | `modeles-autorises.json` | The authorised models: exact identifiers, call parameters and batch limits, read by `check_access.py` and by the skeleton. |
 | `.gitignore` | Keeps environment files, keys, virtual environments and caches out of your public repository. Keep it at the root of the repository. |
+| `.env.exemple` | Template for the local API keys. Copy it to `.env`; the Python scripts load it on macOS, Linux and Windows PowerShell. |
 
 ## The three assignments
 

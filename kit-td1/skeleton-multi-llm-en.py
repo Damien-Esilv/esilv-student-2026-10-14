@@ -69,7 +69,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+from env_loader import load_dotenv
+
 HERE = Path(__file__).resolve().parent
+load_dotenv(HERE / ".env")
 
 # Layout of the student kit: every resource is next to this file. When the file
 # runs from the repository instead of the kit, the same resources are looked up

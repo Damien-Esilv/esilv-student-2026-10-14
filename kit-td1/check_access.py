@@ -11,8 +11,7 @@ met.
 
 Usage:
     pip install requests
-    export GROQ_API_KEY="gsk_..."
-    export OPENROUTER_API_KEY="sk-or-v1-..."
+    Copy .env.exemple to .env, fill in the keys, then run this script.
     python3 check_access.py                 # database of the kit: data/boutique.sqlite
     python3 check_access.py --db PATH       # another copy of boutique.sqlite (manifest.json beside it)
     python3 check_access.py --no-network    # Python and database checks only
@@ -30,7 +29,10 @@ import sys
 import time
 from pathlib import Path
 
+from env_loader import load_dotenv
+
 HERE = Path(__file__).resolve().parent
+load_dotenv(HERE / ".env")
 CONFIG = HERE / "modeles-autorises.json"
 DATABASE_NAME = "boutique.sqlite"
 DATABASE_CANDIDATES = (

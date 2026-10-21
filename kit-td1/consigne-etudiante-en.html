@@ -60,13 +60,10 @@ CREATE TABLE orders (                                   -- one row per order lin
 <h2 id="section-3">2. Create the two free accounts</h2>
 <p><strong>Groq (Free plan).</strong> Create an account on <code>https://console.groq.com</code>, open "API Keys", create one key and copy it once. Stay on the Free plan: do not add a payment method. Read the current request and token limits for each model and your organisation in the console. These are shared by its keys; a second key adds no capacity. The <a href="https://console.groq.com/docs/rate-limits">official limits</a> explain how to read the counters.</p>
 <p><strong>OpenRouter.</strong> Create an account on <code>https://openrouter.ai</code>, open "Keys" and create one key. Do not buy credits: only the models whose identifier ends with <code>:free</code> are used, with the exact identifiers listed in section 4. The program requests zero-price routes (<code>provider.max_price</code> at zero). Check your allowance in the account dashboard before and after each batch; record the calls made, including access checks and retries. Read <code>https://openrouter.ai/docs/api_reference/limits</code> for the current values.</p>
-<p>Keep the keys in environment variables on your own computer. Never write them in a file of the repository, never paste them in a notebook, never commit them.</p>
-<pre><code># Linux, macOS
-export GROQ_API_KEY="gsk_..."
-export OPENROUTER_API_KEY="sk-or-v1-..."</code></pre>
-<p><strong>Windows PowerShell</strong></p>
-<pre><code>$env:GROQ_API_KEY = "gsk_..."
-$env:OPENROUTER_API_KEY = "sk-or-v1-..."</code></pre>
+<p>Copy <code>kit-td1/.env.exemple</code> to <code>kit-td1/.env</code> and fill in the keys. The Python scripts load this file on macOS, Linux and Windows PowerShell. Never commit <code>.env</code>, paste a key in a notebook, or publish a key.</p>
+<pre><code># kit-td1/.env
+GROQ_API_KEY=gsk_...
+OPENROUTER_API_KEY=sk-or-v1-...</code></pre>
 <h2 id="section-4">3. Call a model</h2>
 <p>Both providers accept the same JSON format. Only the URL, the headers and the name of the output cap differ.</p>
 <div class="tableau"><table>

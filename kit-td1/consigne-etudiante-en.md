@@ -83,21 +83,14 @@ record the calls made, including access checks and retries.
 Read `https://openrouter.ai/docs/api_reference/limits`
 for the current values.
 
-Keep the keys in environment variables on your own computer. Never write them
-in a file of the repository, never paste them in a notebook, never commit them.
+Copy `kit-td1/.env.exemple` to `kit-td1/.env` and fill in the keys. The
+Python scripts load this file on macOS, Linux and Windows PowerShell. Never
+commit `.env`, paste a key in a notebook, or publish a key.
 
-```bash
-# Linux, macOS
-export GROQ_API_KEY="gsk_..."
-export OPENROUTER_API_KEY="sk-or-v1-..."
-
-```
-
-**Windows PowerShell**
-
-```powershell
-$env:GROQ_API_KEY = "gsk_..."
-$env:OPENROUTER_API_KEY = "sk-or-v1-..."
+```text
+# kit-td1/.env
+GROQ_API_KEY=gsk_...
+OPENROUTER_API_KEY=sk-or-v1-...
 ```
 
 ## 3. Call a model
