@@ -45,6 +45,7 @@ sub-group. Read the environment guide first and finish preparation by 18 October
 | `sandbox_sqlite.py` | Read-only SQLite sandbox, used by the skeleton for every query a model returns. |
 | `atelier-vote.py` | Runs your vote on four synthetic examples, then on the stored traces of one question. No network. |
 | `atelier-routage.py` | Reads the decisions of a routing rule on seven scenarios with synthetic resources, then you adapt it to your own rule. No network. |
+| `display-comparison-matrix.py` | Displays the final model-by-question status pivot from `model-question-comparison-en.csv`. |
 
 ## Reading a portfolio and a cost
 
@@ -75,7 +76,12 @@ cd kit-td1
 python3 check_access.py                       # Python, database hash, one probe per authorised model
 python3 skeleton-multi-llm-en.py --demo       # the whole chain on three simulated models, no key, no network
 python3 atelier-routage.py                    # the seven routing scenarios, no network
+python3 display-comparison-matrix.py          # interactive status matrix for the plenary
+python3 display-comparison-matrix.py --save comparison-matrix.png  # also save an image
+python3 display-comparison-matrix.py --save comparison-matrix.png --no-show  # save without a window
 ```
+
+The matrix script requires Matplotlib. Install it with `python -m pip install matplotlib` if it is not already available.
 
 Then step 1 of [enonce-td1-en](enonce-td1-en.html): fill in `reference-td1.csv`. Step 2 uses the allocation and `--models` / `--cases` commands in the assignment. The base batch is 100 cells (60 Groq, 40 OpenRouter); controls and retries are separate, with at most one retry per cell. Each operator checks their own allowance. Keep the CSV and JSONL attempts.
 

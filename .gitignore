@@ -25,4 +25,5 @@ Thumbs.db
 # Local temporary and generic traces
 traces-td1.*
 kit-td1/traces-td1.*
+!kit-td1/traces-td1.csv
 csv-sauvegarde/
