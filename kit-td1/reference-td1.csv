@@ -1,26 +1,4 @@
 case_id,sql,revenue_cents
-<<<<<<< HEAD
-C01,,
-C02,,
-C03,,
-C04,,
-C05,,
-C06,,
-C07,,
-C08,,
-C09,,
-C10,,
-C11,,
-C12,,
-C13,,
-C14,,
-C15,,
-C16,,
-C17,,
-C18,,
-C19,,
-C20,,
-=======
 C01,"SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders AS o JOIN product AS p ON p.product_id = o.product_id JOIN customers AS c ON c.customer_id = o.customer_id WHERE o.date >= '2026-03-01 00:00:00' AND o.date < '2026-06-01 00:00:00';",792800
 C02,"SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders AS o JOIN product AS p ON p.product_id = o.product_id JOIN customers AS c ON c.customer_id = o.customer_id WHERE (CAST(strftime('%Y', '2026-09-25') AS INTEGER) - CAST(strftime('%Y', c.birth_date) AS INTEGER) - (strftime('%m-%d', '2026-09-25') < strftime('%m-%d', c.birth_date))) = 25;",590320
 C03,"SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders AS o JOIN product AS p ON p.product_id = o.product_id JOIN customers AS c ON c.customer_id = o.customer_id WHERE o.date >= '2026-01-01 00:00:00' AND o.date < '2026-07-01 00:00:00' AND o.product_id IN ('a', 'b', 'c');",936350
@@ -41,4 +19,3 @@ C17,"SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM
 C18,"SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders AS o JOIN product AS p ON p.product_id = o.product_id JOIN customers AS c ON c.customer_id = o.customer_id WHERE o.date >= '2026-05-01 00:00:00' AND o.date < '2026-06-01 00:00:00' AND (CAST(strftime('%Y', o.date) AS INTEGER) - CAST(strftime('%Y', c.birth_date) AS INTEGER) - (strftime('%m-%d', o.date) < strftime('%m-%d', c.birth_date))) = 25;",62480
 C19,"SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders AS o JOIN product AS p ON p.product_id = o.product_id JOIN customers AS c ON c.customer_id = o.customer_id WHERE o.date >= '2026-09-01 00:00:00' AND o.date < '2026-10-01 00:00:00' AND o.product_id IN ('d') AND (CAST(strftime('%Y', '2026-09-25') AS INTEGER) - CAST(strftime('%Y', c.birth_date) AS INTEGER) - (strftime('%m-%d', '2026-09-25') < strftime('%m-%d', c.birth_date))) = 25;",1990
 C20,"SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents FROM orders AS o JOIN product AS p ON p.product_id = o.product_id JOIN customers AS c ON c.customer_id = o.customer_id WHERE o.date >= '2026-06-01 00:00:00' AND o.date < '2026-09-01 00:00:00';",1106090
->>>>>>> 4efc410 (Premier commit)
