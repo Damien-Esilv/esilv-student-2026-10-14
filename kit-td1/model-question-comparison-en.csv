@@ -1,1 +1,101 @@
 case_id,model_id,trace_file,cell_id,nature,status,value_cents,reference_cents,explanation
+C01,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C01,real,correct,792800,792800,Matches the locally computed reference; human validation pending.
+C02,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C02,real,correct,590320,590320,Matches the locally computed reference; human validation pending.
+C03,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C03,real,correct,936350,936350,Matches the locally computed reference; human validation pending.
+C04,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C04,real,correct,2826250,2826250,Matches the locally computed reference; human validation pending.
+C05,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C05,real,correct,38480,38480,Matches the locally computed reference; human validation pending.
+C06,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C06,real,correct,0,0,Matches the locally computed reference; human validation pending.
+C07,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C07,real,correct,13970,13970,Matches the locally computed reference; human validation pending.
+C08,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C08,real,correct,605580,605580,Matches the locally computed reference; human validation pending.
+C09,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C09,real,correct,487980,487980,Matches the locally computed reference; human validation pending.
+C10,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C10,real,correct,558980,558980,Matches the locally computed reference; human validation pending.
+C11,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C11,real,correct,446690,446690,Matches the locally computed reference; human validation pending.
+C12,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C12,real,correct,1666490,1666490,Matches the locally computed reference; human validation pending.
+C13,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C13,real,correct,107740,107740,Matches the locally computed reference; human validation pending.
+C14,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C14,real,correct,0,0,Matches the locally computed reference; human validation pending.
+C15,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C15,real,correct,168680,168680,Matches the locally computed reference; human validation pending.
+C16,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C16,real,correct,376740,376740,Matches the locally computed reference; human validation pending.
+C17,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C17,real,correct,258180,258180,Matches the locally computed reference; human validation pending.
+C18,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C18,real,correct,62480,62480,Matches the locally computed reference; human validation pending.
+C19,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C19,real,incorrect,0,1990,C19 age filter selects only the exact 25th birthday; see step3-analysis-en.md#c19
+C20,groq:openai/gpt-oss-120b,traces-gpt120b-C01-C20.csv,groq:openai/gpt-oss-120b:C20,real,correct,1106090,1106090,Matches the locally computed reference; human validation pending.
+C01,groq:openai/gpt-oss-20b,,,,not_executed,,792800,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C02,groq:openai/gpt-oss-20b,,,,not_executed,,590320,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C03,groq:openai/gpt-oss-20b,,,,not_executed,,936350,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C04,groq:openai/gpt-oss-20b,,,,not_executed,,2826250,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C05,groq:openai/gpt-oss-20b,,,,not_executed,,38480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C06,groq:openai/gpt-oss-20b,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C07,groq:openai/gpt-oss-20b,,,,not_executed,,13970,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C08,groq:openai/gpt-oss-20b,,,,not_executed,,605580,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C09,groq:openai/gpt-oss-20b,,,,not_executed,,487980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C10,groq:openai/gpt-oss-20b,,,,not_executed,,558980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C11,groq:openai/gpt-oss-20b,,,,not_executed,,446690,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C12,groq:openai/gpt-oss-20b,,,,not_executed,,1666490,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C13,groq:openai/gpt-oss-20b,,,,not_executed,,107740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C14,groq:openai/gpt-oss-20b,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C15,groq:openai/gpt-oss-20b,,,,not_executed,,168680,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C16,groq:openai/gpt-oss-20b,,,,not_executed,,376740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C17,groq:openai/gpt-oss-20b,,,,not_executed,,258180,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C18,groq:openai/gpt-oss-20b,,,,not_executed,,62480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C19,groq:openai/gpt-oss-20b,,,,not_executed,,1990,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C20,groq:openai/gpt-oss-20b,,,,not_executed,,1106090,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C01,openrouter:cohere/north-mini-code:free,,,,not_executed,,792800,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C02,openrouter:cohere/north-mini-code:free,,,,not_executed,,590320,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C03,openrouter:cohere/north-mini-code:free,,,,not_executed,,936350,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C04,openrouter:cohere/north-mini-code:free,,,,not_executed,,2826250,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C05,openrouter:cohere/north-mini-code:free,,,,not_executed,,38480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C06,openrouter:cohere/north-mini-code:free,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C07,openrouter:cohere/north-mini-code:free,,,,not_executed,,13970,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C08,openrouter:cohere/north-mini-code:free,,,,not_executed,,605580,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C09,openrouter:cohere/north-mini-code:free,,,,not_executed,,487980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C10,openrouter:cohere/north-mini-code:free,,,,not_executed,,558980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C11,openrouter:cohere/north-mini-code:free,,,,not_executed,,446690,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C12,openrouter:cohere/north-mini-code:free,,,,not_executed,,1666490,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C13,openrouter:cohere/north-mini-code:free,,,,not_executed,,107740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C14,openrouter:cohere/north-mini-code:free,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C15,openrouter:cohere/north-mini-code:free,,,,not_executed,,168680,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C16,openrouter:cohere/north-mini-code:free,,,,not_executed,,376740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C17,openrouter:cohere/north-mini-code:free,,,,not_executed,,258180,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C18,openrouter:cohere/north-mini-code:free,,,,not_executed,,62480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C19,openrouter:cohere/north-mini-code:free,,,,not_executed,,1990,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C20,openrouter:cohere/north-mini-code:free,,,,not_executed,,1106090,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C01,groq:qwen/qwen3.8-27b,,,,not_executed,,792800,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C02,groq:qwen/qwen3.8-27b,,,,not_executed,,590320,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C03,groq:qwen/qwen3.8-27b,,,,not_executed,,936350,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C04,groq:qwen/qwen3.8-27b,,,,not_executed,,2826250,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C05,groq:qwen/qwen3.8-27b,,,,not_executed,,38480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C06,groq:qwen/qwen3.8-27b,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C07,groq:qwen/qwen3.8-27b,,,,not_executed,,13970,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C08,groq:qwen/qwen3.8-27b,,,,not_executed,,605580,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C09,groq:qwen/qwen3.8-27b,,,,not_executed,,487980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C10,groq:qwen/qwen3.8-27b,,,,not_executed,,558980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C11,groq:qwen/qwen3.8-27b,,,,not_executed,,446690,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C12,groq:qwen/qwen3.8-27b,,,,not_executed,,1666490,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C13,groq:qwen/qwen3.8-27b,,,,not_executed,,107740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C14,groq:qwen/qwen3.8-27b,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C15,groq:qwen/qwen3.8-27b,,,,not_executed,,168680,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C16,groq:qwen/qwen3.8-27b,,,,not_executed,,376740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C17,groq:qwen/qwen3.8-27b,,,,not_executed,,258180,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C18,groq:qwen/qwen3.8-27b,,,,not_executed,,62480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C19,groq:qwen/qwen3.8-27b,,,,not_executed,,1990,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C20,groq:qwen/qwen3.8-27b,,,,not_executed,,1106090,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C01,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,792800,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C02,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,590320,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C03,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,936350,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C04,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,2826250,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C05,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,38480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C06,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C07,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,13970,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C08,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,605580,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C09,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,487980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C10,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,558980,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C11,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,446690,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C12,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,1666490,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C13,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,107740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C14,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,0,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C15,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,168680,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C16,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,376740,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C17,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,258180,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C18,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,62480,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C19,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,1990,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
+C20,openrouter:dots-studio/dots-3-note-preview:free,,,,not_executed,,1106090,No retained trace for this model; only GPT-OSS 120B was run in the current experiment.
