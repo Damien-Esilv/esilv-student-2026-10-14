@@ -1,10 +1,11 @@
 # Next GenAI
 
-## Team member : 
- - maximilien studer
- - benoit payet
- - ilias hormatallah
- - vivien gruel
- - malo gervaise
- - esteban gaubert
- - damien catau
+## Team Members
+
+* Maximilien Studer
+* Benoit Payet
+* Ilias Hormatallah
+* Vivien Gruel
+* Malo Gervaise
+* Esteban Gaubert
+* Damien Catau
