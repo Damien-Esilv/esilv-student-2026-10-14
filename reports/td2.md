@@ -21,7 +21,7 @@
 
 ### 3.1 Taux exacts de TD 1 par famille de questions
 
-Sources : `kit-td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json` (lot de 20 questions `C01`–`C20`).
+Sources : `td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json` (lot de 20 questions `C01`–`C20`).
 
 | Famille | Cellules TD 1 | `cohere/north-mini-code:free` | `dots-studio/dots-3-note-preview:free` | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` |
 |---|---|---|---|---|---|---|
