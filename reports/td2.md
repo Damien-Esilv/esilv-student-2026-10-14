@@ -1,8 +1,10 @@
-# Rapport TD 2 — Quorum et règle de routage
-## Étape 1 — Vote *k*-sur-*n* (Binôme A)
+# TD 2 Report — The Quorum and the Routing Rule
 
-### 1.1 Completed Method
+## Step 1 — The *k*-of-*n* Vote (Pair A)
 
+### 1.1 Completed Method (`kit-td1/skeleton-multi-llm-en.py`)
+
+```python
 def vote_k_sur_n(self, traces_question: list, k: int):
         """TD 2 contract. `traces_question` holds the proposals of the panel for one
         question, as built by `atelier-vote.py`. Each proposal carries `provider`,
@@ -72,98 +74,182 @@ def vote_k_sur_n(self, traces_question: list, k: int):
             return {"consensus": True, "value": winner_val,"votes": len(winner_models),"models": winner_models,}
         else:
             return {"consensus": False,"value": None,"votes": max_votes,"models": [],}
+```
 
-### 1.2 Comparison table : 2-3 vs 3-5
+### 1.2 Twenty-Question Comparison Table: 2-of-3 vs 3-of-5
 
-* **Fixed panel 2-3 ($n=3, k=2$)** : `openai/gpt-oss-120b` (Groq), `cohere/north-mini-code:free` (OpenRouter), `qwen/qwen3.8-27b` (Groq).
-* **Quorum 3-5 ($n=5, k=3$)** : 3 last models + `openai/gpt-oss-20b` (Groq) + `dots-studio/dots-3-note-preview:free` (OpenRouter).
+* **Fixed 2-of-3 panel ($n=3, k=2$)**: `openai/gpt-oss-120b` (Groq), `cohere/north-mini-code:free` (OpenRouter), `qwen/qwen3.8-27b` (Groq).
+* **3-of-5 quorum ($n=5, k=3$)**: the 3 models above + `openai/gpt-oss-20b` (Groq) + `dots-studio/dots-3-note-preview:free` (OpenRouter).
 
 | Case | 2-of-3 Decision | 2/3 Votes | 2/3 Compliant? | 3-of-5 Decision | 3/5 Votes | 3/5 Compliant? | Decision Change / Observed Deviation |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
-| **C01** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C02** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 $\to$ 3/5 (Cohere & GPT-20b return 0; Dots votes 590,320) |
-| **C03** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C04** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C05** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C06** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5; correct `COALESCE` on empty set) |
-| **C07** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C08** | **Consensus** | **2/3** | **Compliant** | **Abstention** | **2/5** | **None** | **MAJOR CHANGE: Consensus $\to$ Abstention** (GPT-20b and Dots diverge on 25,920 and 523,000) |
-| **C09** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 $\to$ 3/5 (Qwen returns 0; GPT-20b secures the 3rd vote) |
+| **C01** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C02** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 → 3/5 (Cohere & GPT-20B return 0; Dots votes 590,320) |
+| **C03** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C04** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C05** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C06** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5; correct `COALESCE` on empty set) |
+| **C07** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C08** | **Consensus** | **2/3** | **Compliant** | **Abstention** | **2/5** | **None** | **MAJOR CHANGE: Consensus → Abstention** (GPT-20B and Dots diverge on 25,920 and 523,000) |
+| **C09** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 → 3/5 (Qwen returns 0; GPT-20B secures the 3rd vote) |
 | **C10** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; 2 SQL errors in 2/3 (Cohere syntax, Qwen join) |
-| **C11** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 $\to$ 3/5 (Cohere and GPT-20b fail; Dots votes 446,690) |
-| **C12** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C13** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C14** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
-| **C15** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; multiple dispersion (168,680 gets 2 votes < k=3) |
-| **C16** | Consensus | 3/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 3/3 $\to$ 4/5 (Dots fails at 211,260) |
+| **C11** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 → 3/5 (Cohere and GPT-20B fail; Dots votes 446,690) |
+| **C12** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C13** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C14** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 → 5/5) |
+| **C15** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; dispersion (168,680 gets 2 votes < k=3) |
+| **C16** | Consensus | 3/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 3/3 → 4/5 (Dots fails at 211,260) |
 | **C17** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; Dots SQL syntax error (`near "AS"`) |
-| **C18** | Consensus | 3/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 3/3 $\to$ 4/5 (Dots fails at 39,580) |
-| **C19** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; 2/3 panel fails completely; GPT-20b and Dots have 1,990 (2 < 3) |
-| **C20** | Consensus | 2/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 2/3 $\to$ 4/5; **Fault tolerance**: Qwen hit HTTP 429 |
+| **C18** | Consensus | 3/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 3/3 → 4/5 (Dots fails at 39,580) |
+| **C19** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; 2/3 panel fails completely; GPT-20B and Dots have 1,990 (2 < 3) |
+| **C20** | Consensus | 2/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 2/3 → 4/5; **Fault tolerance**: Qwen hit HTTP 429 |
 
-### 1.3 Analyse détaillée des écarts et enseignements
+### 1.3 Detailed Analysis of Deviations and Key Takeaways
 
-1. **Le cas de bascule C08 (Consensus transformé en Abstention) :**
-   - *Question* : chiffre d'affaires des clients ayant 25 ans révolus au 2026-09-24.
-   - *Traces exactes* : `gpt-120b` = 605 580 (correct), `cohere` = 1 188 090 (incorrect), `qwen` = 605 580 (correct), `gpt-20b` = 25 920 (incorrect), `dots-3` = 523 000 (incorrect).
-   - *Mécanisme* : Dans le panel 2-sur-3, `gpt-120b` et `qwen` s'accordent sur la borne de date correcte, atteignant le seuil $k=2$. En passant à 5 modèles, les deux modèles ajoutés (`gpt-20b` et `dots-3`) échouent tous deux sur le calcul d'âge et renvoient des valeurs erronées différentes. La valeur exacte `605 580` ne rassemble que 2 voix sur 5, ce qui est strictement inférieur au seuil requis $k=3$. Le quorum 3-sur-5 **s'abstient**.
-   - *Enseignement* : Élargir un quorum à des modèles de moindre capacité augmente le risque de dispersion des voix sur des conditions temporelles complexes. Le quorum 3-sur-5 privilégie la prudence et la sécurité au détriment de la disponibilité.
+1. **The C08 Tipping Point (Consensus Turning into Abstention):**
+   - *Question*: revenue from customers aged 25 on 2026-09-24.
+   - *Exact trace values*: `gpt-120b` = `605580` (correct), `cohere` = `1188090` (incorrect), `qwen` = `605580` (correct), `gpt-20b` = `25920` (incorrect), `dots-3` = `523000` (incorrect).
+   - *Mechanism*: In the 2-of-3 panel, `gpt-120b` and `qwen` agree on the right date boundary, meeting $k=2$. Moving to 5 models adds `gpt-20b` and `dots-3`, which both miscalculate the age condition and return distinct wrong values. The true value `605580` only gathers 2 votes out of 5 (< $k=3$), so the 3-of-5 quorum **abstains**.
+   - *Takeaway*: Expanding a quorum with weaker models increases vote dispersion on complex temporal conditions. The 3-of-5 setup favors safety over availability.
 
-2. **Résilience infrastructurelle sur C20 (Absorption d'une erreur HTTP 429) :**
-   - *Trace* : `qwen/qwen3.8-27b` subit un dépassement de quota tokens/minute (`http_status=429`, `verdict=not_executed`).
-   - *Mécanisme* : En 2-sur-3, le panel est fragilisé : seuls 2 modèles s'exécutent (`gpt-120b` et `cohere` à `1 106 090`), atteignant de justesse le seuil $k=2$. En 3-sur-5, `gpt-20b` et `dots-3` s'exécutent avec succès et votent également `1 106 090`. Le quorum atteint **4 voix sur 5**, absorbant l'indisponibilité temporaire de Qwen sans vaciller.
+2. **Infrastructure Resilience on C20 (Absorbing an HTTP 429 Error):**
+   - *Trace*: `qwen/qwen3.8-27b` hits a tokens-per-minute rate limit (`http_status=429`, `verdict=not_executed`).
+   - *Mechanism*: In 2-of-3, only two models run (`gpt-120b` and `cohere` at `1106090`), barely clearing $k=2$. In 3-of-5, `gpt-20b` and `dots-3` execute cleanly and also vote `1106090`. The quorum reaches **4 votes out of 5**, absorbing Qwen's temporary outage.
 
-3. **Filtrage des requêtes SQL malformées (C10 et C17) :**
-   - Sur C10, `cohere` génère une erreur de syntaxe SQLite (`syntax_error near ")"`) et `qwen` une erreur d'exécution (`runtime_error no such column: p.price` car la table `product` n'a pas été jointe).
-   - Sur C17, `dots-3` produit une syntaxe invalide (`syntax_error near "AS"`).
-   - Ces requêtes échouent avant résultat et ne votent pas (`verdict != "executed"`), évitant toute corruption du vote.
+3. **Filtering Out Malformed SQL Queries (C10 and C17):**
+   - On C10, `cohere` throws a SQLite syntax error (`syntax_error near ")"`), while `qwen` hits a runtime error (`runtime_error no such column: p.price` due to a missing join on `product`).
+   - On C17, `dots-3` generates invalid syntax (`syntax_error near "AS"`).
+   - Because these queries fail before returning a value, they do not vote (`verdict != "executed"`), preventing corrupted outputs from skewing the consensus.
 
-4. **Questions simples témoins (F1 et F3) :**
-   - 100 % d'unanimité (5/5) sur les 9 questions de période pure et de liste de produits (`C01, C03, C04, C05, C06, C07, C12, C13, C14`).
-   - Confirme la règle de routage du Binôme C : pour F1 et F3, un modèle gratuit rapide sans vérification lourde suffit pour les usages internes.
-
----
-
-## Étape 2 — Faux consensus SQL (Binôme B)
-
-*(À compléter par le Binôme B : cas identifié dans `traces-td1.csv` ou `DEMO-SQL-C11`, verdict des quorums 2-sur-3 et 3-sur-5, diagnostic des clauses SQL fautives et requête delta sur `data/boutique.sqlite`.)*
+4. **Simple Control Questions (F1 and F3):**
+   - 100% unanimity (5/5) on the 9 pure period and product-list questions (`C01, C03, C04, C05, C06, C07, C12, C13, C14`), confirming Pair C's routing choice to use a fast free model without heavy checking for low-stakes internal dashboards.
 
 ---
 
-## Étape 3 — Règle de routage et simulateur (Binôme C)
+## Step 2 — SQL Wrong Consensus (Pair B)
 
-### 3.1 Taux exacts de TD 1 par famille de questions
+### 2.1 Case Studied and Results
 
-Sources : `kit-td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json` (lot de 20 questions `C01`–`C20`).
+Question **C02** asks for the total revenue excluding VAT, in euro cents, across **all orders placed by customers who are exactly 25 years old on 25 September 2026**. This case comes from our TD 1 batch of 21 October 2026 (`nature=real`). The stored queries were re-executed locally on `kit-td1/data/boutique.sqlite` with no new model calls.
 
-| Famille | Cellules TD 1 | `cohere/north-mini-code:free` | `dots-studio/dots-3-note-preview:free` | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` |
+The C02 reference value in [reference-td1.csv](../kit-td1/reference-td1.csv) is **590,320 cents**. The five retained answers are:
+
+| Provider and Model | Value (cents) | Verdict | Source Trace in `td1/raw-traces` |
+|---|---:|---|---|
+| Groq / `openai/gpt-oss-120b` | 590,320 | correct | `traces-gpt120b-C01-C20.csv` |
+| OpenRouter / `cohere/north-mini-code:free` | 0 | incorrect | `traces-C.csv` |
+| Groq / `qwen/qwen3.8-27b` | 590,320 | correct | `traces-D.csv` |
+| Groq / `openai/gpt-oss-20b` | 0 | incorrect | `traces-gpt20b-C01-C20.csv` |
+| OpenRouter / `dots-studio/dots-3-note-preview:free` | 590,320 | correct | `traces-E.csv` |
+
+All five C02 cells appear in [traces-td1.csv](../kit-td1/traces-td1.csv). For Dots, we retain the main batch `traces-E.csv`, consistent with the [TD 1 comparison table](../td1/model-question-comparison-en.csv).
+
+**GPT-OSS 20B** and **Cohere** share the exact same wrong value, **0**, with a gap of **590,320 cents** from the reference.
+
+### 2.2 SQL Queries and Root Causes
+
+**GPT-OSS 20B** — cell `groq:openai/gpt-oss-20b:C02`, attempt 1, in [traces-gpt20b-C01-C20.csv](../td1/raw-traces/traces-gpt20b-C01-C20.csv). Original query:
+
+```sql
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+JOIN product p ON o.product_id = p.product_id
+WHERE c.birth_date > '2025-09-25' AND c.birth_date <= '2026-09-25';
+```
+
+The filter selects people born in the year preceding 25 September 2026 instead of customers aged 25. The correct window is **`2000-09-25 < birth_date <= 2001-09-25`**: the lower bound excludes customers already aged 26, while the upper bound includes those turning 25 on that day. No customer matches the faulty filter; the query runs without error and `COALESCE` returns **0**.
+
+**Cohere** — cell `openrouter:cohere/north-mini-code:free:C02`, attempt 1, in [traces-C.csv](../td1/raw-traces/traces-C.csv). Original query:
+
+```sql
+SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+JOIN product p ON o.product_id = p.product_id
+WHERE c.birth_date <= '2026-09-25' AND c.birth_date > date('2026-09-25', '-26 years')
+AND c.birth_date <= date('2026-09-25', '-25 years') AND c.birth_date > date('2026-09-25', '-26 years')
+AND o.date >= '2026-09-25 00:00:00' AND o.date < '2027-09-25 00:00:00';
+```
+
+The age filter is correct despite repeated conditions. The bug is adding the two `o.date` restrictions: C02 asks for **all orders**, without a period filter. Since the latest order in the database is on **20 September 2026 at 19:24:25**, no order matches the added period and the query also returns **0**.
+
+Both models return the same wrong value for **two different reasons**: a wrong birth-date window and a spurious order-date filter.
+
+### 2.3 Delta Diagnostic SQL Query and Independent Check
+
+Both faulty queries select zero rows, so the missed amounts correspond to all orders of customers truly aged 25 on `2026-09-25`. The [delta diagnostic query](../td2/B-consensus/diagnostic-c02.sql), executed on `kit-td1/data/boutique.sqlite`, lists these customers and their revenue excluding VAT:
+
+```sql
+SELECT c.customer_id,
+       c.birth_date,
+       SUM(o.quantity_product * p.price) AS revenue_cents
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+JOIN product p ON o.product_id = p.product_id
+WHERE c.birth_date > '2000-09-25'
+  AND c.birth_date <= '2001-09-25'
+GROUP BY c.customer_id, c.birth_date
+ORDER BY c.customer_id;
+```
+
+| Customer | Birth Date | Revenue Missed by Both Models (cents) |
+|---|---|---:|
+| `C001` | `2001-09-25` | 135,000 |
+| `C002` | `2001-09-24` | 25,920 |
+| `C005` | `2000-09-26` | 150,240 |
+| `C007` | `2000-11-30` | 118,740 |
+| `C008` | `2001-05-15` | 99,090 |
+| `C009` | `2001-03-10` | 61,330 |
+| **Total** | | **590,320** |
+
+These six customers account for the exact gap for both models: **590,320 - 0 = 590,320 cents**. No rows are wrongly added by either query; all differences are omissions.
+
+**Independent check:** a Python calculation directly over `customers.csv`, `orders.csv`, and `product.csv`, without running SQL, reproduces the exact same per-customer amounts and total.
+
+### 2.4 Quorums and Verification with Pair A
+
+| Declared Panel | Threshold | Votes for `590,320` | Votes for `0` | Decision Confirmed with Pair A's Code |
+|---|---:|---:|---:|---|
+| `gpt-oss-120b`, `cohere`, `qwen` | 2 of 3 | 2 | 1 | Consensus on `590,320`, correct |
+| All five TD 1 models above | 3 of 5 | 3 | 2 | Consensus on `590,320`, correct |
+
+In 2-of-3, `gpt-oss-120b` and `qwen` vote for the right value; in 3-of-5, `dots-3` provides the third vote. **The wrong agreement between `gpt-oss-20b` and `cohere` is outvoted in both configurations.**
+
+**Verification with Pair A (18 November 2026):** running `atelier-vote.py --traces traces-td1.csv --case C02 --panel 3` and `--panel 5` reproduces our manual counts (`consensus: true`, `value: 590320`, `votes: 2` for 2-of-3; `votes: 3` for 3-of-5; `matches_reference: true`). This demonstrates that two models can agree on the same wrong value from completely different SQL mistakes, and why independent data/filter checks remain essential.
+
+---
+
+## Step 3 — Routing Rule and Simulator (Pair C)
+
+### 3.1 Exact TD 1 Accuracy Rates by Question Family
+
+Sources: [model-question-comparison-en.csv](../td1/model-question-comparison-en.csv) and [questions-td1.json](../kit-td1/questions-td1.json) (20-question batch `C01`–`C20`).
+
+| Family | TD 1 Cells | `cohere/north-mini-code:free` | `dots-studio/dots-3-note-preview:free` | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` |
 |---|---|---|---|---|---|---|
-| **F1** (période) | `C01, C04, C05, C06, C07, C20` | **6/6** (100 %) | **6/6** (100 %) | **6/6** (100 %) | **6/6** (100 %) | **5/6** (83 %, `C20` HTTP 429) |
-| **F2** (âge révolu à une date) | `C02, C08, C09, C11` | **1/4** (25 %, err. `C02, C08, C11`) | **2/4** (50 %, err. `C08, C09`) | **4/4** (100 %) | **1/4** (25 %, err. `C02, C08, C11`) | **3/4** (75 %, err. `C09`) |
-| **F2b** (âge à la commande) | `C10` | **0/1** (0 %, `sql_invalid`) | **0/1** (0 %, err. `C10`) | **1/1** (100 %) | **1/1** (100 %) | **0/1** (0 %, `sql_invalid`) |
-| **F3** (liste de produits) | `C03, C12, C13, C14` | **4/4** (100 %) | **4/4** (100 %) | **4/4** (100 %) | **4/4** (100 %) | **4/4** (100 %) |
-| **Combinaisons** | `C15, C16, C17, C18, C19` | **2/5** (40 %, err. `C15, C17, C19`) | **1/5** (20 %, err. `C15-C18`) | **4/5** (80 %, err. `C19`) | **5/5** (100 %) | **2/5** (40 %, err. `C15, C17, C19`) |
+| **F1** (period) | `C01, C04, C05, C06, C07, C20` | **6/6** (100%) | **6/6** (100%) | **6/6** (100%) | **6/6** (100%) | **5/6** (83%, `C20` HTTP 429) |
+| **F2** (completed age at a date) | `C02, C08, C09, C11` | **1/4** (25%, err. `C02, C08, C11`) | **2/4** (50%, err. `C08, C09`) | **4/4** (100%) | **1/4** (25%, err. `C02, C08, C11`) | **3/4** (75%, err. `C09`) |
+| **F2b** (age at order) | `C10` | **0/1** (0%, `sql_invalid`) | **0/1** (0%, err. `C10`) | **1/1** (100%) | **1/1** (100%) | **0/1** (0%, `sql_invalid`) |
+| **F3** (product list) | `C03, C12, C13, C14` | **4/4** (100%) | **4/4** (100%) | **4/4** (100%) | **4/4** (100%) | **4/4** (100%) |
+| **Combinations** | `C15, C16, C17, C18, C19` | **2/5** (40%, err. `C15, C17, C19`) | **1/5** (20%, err. `C15-C18`) | **4/5** (80%, err. `C19`) | **5/5** (100%) | **2/5** (40%, err. `C15, C17, C19`) |
 
----
+### 3.2 Sub-group One-Page Routing Rule
 
-### 3.2 Règle de routage du sous-groupe (1 page)
+> **Principle and limits:** simple questions (`F1`, `F3`) are kept as control cases to compare routing choices. Twenty questions support a batch-specific hypothesis for this TD 1 run, not a general error rate, a permanent ranking, or a quorum error guarantee.  
+> **Consistency constraint:** calling a single free model with no check (`none`) is only admissible for a low-stakes internal dashboard **AND** on a family where that model achieved **100%** accuracy in TD 1. Whenever at least one error was observed on the family in TD 1, or whenever the figure is shown to a customer or governs a payout, a quorum or deterministic check is required.
 
-> **Principe et limites** : les questions simples (`F1`, `F3`) sont conservées comme témoins pour comparer les choix de routage. Vingt questions soutiennent une hypothèse propre à ce lot TD 1, et non un taux d'erreur général, un classement permanent ou une garantie d'absence d'erreur du quorum.  
-> **Contrainte de cohérence** : appeler un seul modèle gratuit sans vérification (`none`) n'est admissible que pour un tableau de bord interne à faible enjeu **ET** sur une famille où ce modèle a obtenu **100 %** en TD 1. Dès qu'une erreur a été observée sur la famille en TD 1, ou que le chiffre est affiché au client / gouverne un paiement, un quorum ou une vérification déterministe est exigé.
-
-| Famille (Cellules) | 1er modèle appelé (moins cher correct en TD 1) | Tableau de bord interne | Chiffre affiché au client | Montant versé (paiement) | Repli si indisponible (HTTP 429 / quota) |
+| Family (Cells) | First Model Called (cheapest correct in TD 1) | Internal Dashboard | Figure Shown to Customer | Amount Paid Out (Payout) | Fallback if Unavailable (HTTP 429 / Quota) |
 |---|---|---|---|---|---|
-| **F1** (`C01, C04, C05, C06, C07, C20`) | `cohere/north-mini-code:free` (OpenRouter, gratuit — 6/6) | **none** (100 % TD 1 + faible enjeu) | **quorum 2-of-3** + exécution lecture seule | **quorum 3-of-5** + référence / revue | `dots-studio/dots-3-note-preview:free` → `openai/gpt-oss-120b` (Groq) → `defer` ou `abstain` |
-| **F3** (`C03, C12, C13, C14`) | `cohere/north-mini-code:free` (OpenRouter, gratuit — 4/4) | **none** (100 % TD 1 + faible enjeu) | **quorum 2-of-3** + exécution lecture seule | **quorum 3-of-5** + référence / revue | `dots-studio/dots-3-note-preview:free` → `qwen/qwen3.8-27b` → `defer` ou `abstain` |
-| **F2** (`C02, C08, C09, C11`) | `openai/gpt-oss-120b` (Groq, gratuit — 4/4) | **quorum 2-of-3** (les autres gratuits échouent sur F2) | **quorum 3-of-5** | **quorum 3-of-5** + revue humaine / référence | Abonnement (`claude-sonnet-5#claude`) → `defer` si `can_wait` → API payante (`openai/gpt-oss-120b#openrouter`) → `abstain` |
-| **F2b** (`C10`) | `openai/gpt-oss-120b` (Groq, gratuit — 1/1) | **quorum 2-of-3** (1 seul cas en TD 1 ; Cohere/Dots/Qwen échouent) | **quorum 3-of-5** | **quorum 3-of-5** + revue humaine / référence | `openai/gpt-oss-20b` (1/1) → abonnement → `defer` → API payante → `abstain` |
-| **Combinaisons** (`C15, C16, C17, C18, C19`) | `openai/gpt-oss-20b` (5/5) ou `claude-sonnet-5#claude` (abonnement G2) | **quorum 2-of-3** (`gpt-oss-120b` échoue sur `C19`, autres gratuits ≤ 40 %) | **quorum 3-of-5** + vérification SQL | **quorum 3-of-5** + revue humaine + référence | `defer` si `can_wait` (attente rechargement) → API payante (`openai/gpt-oss-120b#openrouter`) → `abstain` |
+| **F1** (`C01, C04, C05, C06, C07, C20`) | `cohere/north-mini-code:free` (OpenRouter, free — 6/6) | **none** (100% TD 1 + low stakes) | **2-of-3 quorum** + read-only execution | **3-of-5 quorum** + reference / review | `dots-studio/dots-3-note-preview:free` → `openai/gpt-oss-120b` (Groq) → `defer` or `abstain` |
+| **F3** (`C03, C12, C13, C14`) | `cohere/north-mini-code:free` (OpenRouter, free — 4/4) | **none** (100% TD 1 + low stakes) | **2-of-3 quorum** + read-only execution | **3-of-5 quorum** + reference / review | `dots-studio/dots-3-note-preview:free` → `qwen/qwen3.8-27b` → `defer` or `abstain` |
+| **F2** (`C02, C08, C09, C11`) | `openai/gpt-oss-120b` (Groq, free — 4/4) | **2-of-3 quorum** (other free models fail on F2) | **3-of-5 quorum** | **3-of-5 quorum** + human review / reference | Subscription (`claude-sonnet-5#claude`) → `defer` if `can_wait` → paid API (`openai/gpt-oss-120b#openrouter`) → `abstain` |
+| **F2b** (`C10`) | `openai/gpt-oss-120b` (Groq, free — 1/1) | **2-of-3 quorum** (only 1 case in TD 1; Cohere/Dots/Qwen fail) | **3-of-5 quorum** | **3-of-5 quorum** + human review / reference | `openai/gpt-oss-20b` (1/1) → subscription → `defer` → paid API → `abstain` |
+| **Combinations** (`C15, C16, C17, C18, C19`) | `openai/gpt-oss-20b` (5/5) or `claude-sonnet-5#claude` (G2 subscription) | **2-of-3 quorum** (`gpt-oss-120b` fails on `C19`, other free models ≤ 40%) | **3-of-5 quorum** + SQL check | **3-of-5 quorum** + human review + reference | `defer` if `can_wait` (wait for refill) → paid API (`openai/gpt-oss-120b#openrouter`) → `abstain` |
 
----
+### 3.3 Simulator Outputs (`kit-td1/atelier-routage.py`)
 
-### 3.3 Sorties du simulateur (`atelier-routage.py`)
-
-#### Avant adaptation (`python atelier-routage.py`)
+#### Before Adaptation (`python3 atelier-routage.py`)
 ```json
 {"scenario": "simple", "nature": "simulation", "request": {"difficulty": 1, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "small-free", "cash": 0, "checks": "read-only execution and value check", "reason": "eligible included capacity"}}
 {"scenario": "complex", "nature": "simulation", "request": {"difficulty": 3, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "senior-subscription", "cash": 0, "checks": "read-only execution and value check", "reason": "eligible included capacity"}}
@@ -174,7 +260,7 @@ Sources : `kit-td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.j
 {"scenario": "unknown capability", "nature": "simulation", "request": {"difficulty": 4, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "abstain", "resource": null, "cash": 0, "checks": "read-only execution and value check", "reason": "no eligible resource within deadline and budget"}}
 ```
 
-#### Après adaptation (`kit-td1/atelier-routage.py` avec `RESOURCES` et `choose` adaptés)
+#### After Adaptation (`kit-td1/atelier-routage.py` with adapted `RESOURCES` and `choose`)
 ```json
 {"scenario": "simple", "nature": "simulation", "request": {"difficulty": 1, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "cohere/north-mini-code:free", "cash": 0, "checks": "none (100% TD1 on F1/F3 for internal dashboard) or read-only value check", "reason": "eligible included capacity [F1 6/6 (C01,C04-C07,C20), F3 4/4 (C03,C12-C14)]"}}
 {"scenario": "complex", "nature": "simulation", "request": {"difficulty": 3, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "claude-sonnet-5#claude", "cash": 0, "checks": "quorum 2-of-3 + read-only SQL execution", "reason": "eligible included capacity [G2 subscription fallback for Combinaisons (C15-C19 where free models fail)]"}}
@@ -185,19 +271,20 @@ Sources : `kit-td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.j
 {"scenario": "unknown capability", "nature": "simulation", "request": {"difficulty": 4, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "abstain", "resource": null, "cash": 0, "checks": "quorum 2-of-3 + read-only SQL execution", "reason": "no eligible resource within deadline and budget (TD1: no free model 100% on C15-C19)"}}
 ```
 
----
+### 3.4 Priority Order Analysis in `choose`
 
-### 3.4 Analyse de l'ordre de priorité dans `choose`
-
-1. **Pourquoi une ressource d'abonnement immédiatement disponible (`cash == 0`, `allocation > 0`) est choisie avant de différer (`defer`) sur une ressource gratuite épuisée (`cash == 0`, `allocation == 0`) dont le rechargement a lieu avant `deadline_minutes` :**  
-   Dans `choose`, le premier filtre `included = [r for r in eligible if r["available"] and r["cash"] == 0]` regroupe toutes les ressources disponibles sans dépense directe (`cash == 0`), sans séparer les routes gratuites (`allocation == 0`) des abonnements (`allocation > 0`). Dès que `included` est non vide, la fonction exécute un `return` immédiat (`"action": "run"`) et n'évalue jamais le bloc `waiting` qui gère le `defer`.
-2. **Condition opérationnelle pour inverser cette priorité :**  
-   Cette priorité doit être inversée lorsque le quota d'abonnement (`allocation > 0`) est une **ressource rare à préserver pour des requêtes urgentes ou complexes** (`can_wait=False`, fort enjeu) et que la requête courante **peut attendre** (`can_wait=True`) le rechargement d'une route gratuite (`allocation == 0`) prévu avant `deadline_minutes`. Dans ce cas, différer la requête non urgente évite de consommer inutilement l'enveloppe d'abonnement.
+1. **Why an immediately available subscription resource (`cash == 0`, `allocation > 0`) is selected before deferring (`defer`) to wait for an exhausted free resource (`cash == 0`, `allocation == 0`) whose refill occurs before `deadline_minutes`:**  
+   In `choose`, the first filter `included = [r for r in eligible if r["available"] and r["cash"] == 0]` groups all available resources with no direct cash spend (`cash == 0`), without separating free routes (`allocation == 0`) from subscriptions (`allocation > 0`). As soon as `included` is non-empty, the function returns `"action": "run"` immediately and never evaluates the `waiting` block that handles `defer`.
+2. **Operational condition to reverse this priority:**  
+   This priority should be reversed when the subscription quota (`allocation > 0`) is a **scarce resource to preserve for urgent or high-stakes requests** (`can_wait=False`, high impact) and the current request **can wait** (`can_wait=True`) for a free route (`allocation == 0`) to refill before `deadline_minutes`. Deferring non-urgent requests avoids burning limited subscription allowance unnecessarily.
 
 ---
 
-## Contributions et suite
+## Prompts, Limitations, Contributions, and Next Steps
 
-- **Binôme A** : Implémentation du vote strict $k$-sur-$n$ dans `skeleton-multi-llm-en.py`, support multi-panel dans `atelier-vote.py`, tableau comparatif complet 2-sur-3 vs 3-sur-5 sur les 20 questions TD 1, analyse détaillée des écarts (bascule C08, résilience HTTP 429 sur C20, gestion des erreurs SQL C10/C17).
-- **Binôme B** : *(à compléter)*
-- **Binôme C** : Calcul des taux TD 1 par famille (`F1`, `F2`, `F2b`, `F3`, `Combinaisons`), rédaction de la règle de routage, adaptation de `kit-td1/atelier-routage.py` et analyse de l'ordre de priorité de `choose`.
+* **Prompts:** unchanged since TD 1 (`SYSTEM_PROMPT` and `USER_PROMPT_TEMPLATE` in `kit-td1/skeleton-multi-llm-en.py`).
+* **Limitations:** all measurements come from the 20-question TD 1 batch (`traces-td1.csv`), which supports batch-specific hypotheses rather than general error rates or permanent rankings; `atelier-routage.py` uses simulated availability scenarios.
+* **Pair A:** implemented strict $k$-of-$n$ voting in `skeleton-multi-llm-en.py`, added multi-panel support to `atelier-vote.py`, built the 20-question 2-of-3 vs 3-of-5 comparison table, and analysed deviations (`C08`, `C20` HTTP 429, `C10`/`C17` SQL errors, `F1`/`F3` unanimity).
+* **Pair B:** identified the `C02` wrong agreement between `gpt-oss-20b` and `cohere`, diagnosed both distinct SQL root causes, ran the delta query on `data/boutique.sqlite` with an independent CSV check, and verified 2-of-3 / 3-of-5 quorums with Pair A's code.
+* **Pair C:** computed exact TD 1 accuracy rates per family (`F1`, `F2`, `F2b`, `F3`, `Combinations`), wrote the one-page routing rule, adapted `kit-td1/atelier-routage.py`, and analysed the priority order in `choose`.
+* **Next steps (TD 3):** price each configuration (single model, 2-of-3, 3-of-5, escalation) using dated portfolio rates and select the final architecture for a named use case.

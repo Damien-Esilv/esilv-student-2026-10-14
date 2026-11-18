@@ -1,37 +1,37 @@
-# TD 2 — Étape 3 : Règle de routage et simulateur (Binôme C)
+# TD 2 — Step 3: Routing Rule and Simulator (Pair C)
 
-## 1. Taux exacts de TD 1 par famille de questions
+## 1. Exact TD 1 Accuracy Rates by Question Family
 
-Sources : `td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json` (lot de 20 questions `C01`–`C20`).
+Sources: [model-question-comparison-en.csv](../../td1/model-question-comparison-en.csv) and [questions-td1.json](../../kit-td1/questions-td1.json) (20-question batch `C01`–`C20`).
 
-| Famille | Cellules TD 1 | `cohere/north-mini-code:free` | `dots-studio/dots-3-note-preview:free` | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` |
+| Family | TD 1 Cells | `cohere/north-mini-code:free` | `dots-studio/dots-3-note-preview:free` | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` |
 |---|---|---|---|---|---|---|
-| **F1** (période) | `C01, C04, C05, C06, C07, C20` | **6/6** (100 %) | **6/6** (100 %) | **6/6** (100 %) | **6/6** (100 %) | **5/6** (83 %, `C20` HTTP 429) |
-| **F2** (âge révolu à une date) | `C02, C08, C09, C11` | **1/4** (25 %, err. `C02, C08, C11`) | **2/4** (50 %, err. `C08, C09`) | **4/4** (100 %) | **1/4** (25 %, err. `C02, C08, C11`) | **3/4** (75 %, err. `C09`) |
-| **F2b** (âge à la commande) | `C10` | **0/1** (0 %, `sql_invalid`) | **0/1** (0 %, err. `C10`) | **1/1** (100 %) | **1/1** (100 %) | **0/1** (0 %, `sql_invalid`) |
-| **F3** (liste de produits) | `C03, C12, C13, C14` | **4/4** (100 %) | **4/4** (100 %) | **4/4** (100 %) | **4/4** (100 %) | **4/4** (100 %) |
-| **Combinaisons** | `C15, C16, C17, C18, C19` | **2/5** (40 %, err. `C15, C17, C19`) | **1/5** (20 %, err. `C15-C18`) | **4/5** (80 %, err. `C19`) | **5/5** (100 %) | **2/5** (40 %, err. `C15, C17, C19`) |
+| **F1** (period) | `C01, C04, C05, C06, C07, C20` | **6/6** (100%) | **6/6** (100%) | **6/6** (100%) | **6/6** (100%) | **5/6** (83%, `C20` HTTP 429) |
+| **F2** (completed age at a date) | `C02, C08, C09, C11` | **1/4** (25%, err. `C02, C08, C11`) | **2/4** (50%, err. `C08, C09`) | **4/4** (100%) | **1/4** (25%, err. `C02, C08, C11`) | **3/4** (75%, err. `C09`) |
+| **F2b** (age at order) | `C10` | **0/1** (0%, `sql_invalid`) | **0/1** (0%, err. `C10`) | **1/1** (100%) | **1/1** (100%) | **0/1** (0%, `sql_invalid`) |
+| **F3** (product list) | `C03, C12, C13, C14` | **4/4** (100%) | **4/4** (100%) | **4/4** (100%) | **4/4** (100%) | **4/4** (100%) |
+| **Combinations** | `C15, C16, C17, C18, C19` | **2/5** (40%, err. `C15, C17, C19`) | **1/5** (20%, err. `C15-C18`) | **4/5** (80%, err. `C19`) | **5/5** (100%) | **2/5** (40%, err. `C15, C17, C19`) |
 
 ---
 
-## 2. Règle de routage du sous-groupe (1 page)
+## 2. Sub-group One-Page Routing Rule
 
-> **Principe et limites** : les questions simples (`F1`, `F3`) sont conservées comme témoins pour comparer les choix de routage. Vingt questions soutiennent une hypothèse propre à ce lot TD 1, et non un taux d'erreur général, un classement permanent ou une garantie d'absence d'erreur du quorum.  
-> **Contrainte de cohérence** : appeler un seul modèle gratuit sans vérification (`none`) n'est admissible que pour un tableau de bord interne à faible enjeu **ET** sur une famille où ce modèle a obtenu **100 %** en TD 1. Dès qu'une erreur a été observée sur la famille en TD 1, ou que le chiffre est affiché au client / gouverne un paiement, un quorum ou une vérification déterministe est exigé.
+> **Principle and limits:** simple questions (`F1`, `F3`) are kept as control cases to compare routing choices. Twenty questions support a batch-specific hypothesis for this TD 1 run, not a general error rate, a permanent ranking, or a quorum error guarantee.  
+> **Consistency constraint:** calling a single free model with no check (`none`) is only admissible for a low-stakes internal dashboard **AND** on a family where that model achieved **100%** accuracy in TD 1. Whenever at least one error was observed on the family in TD 1, or whenever the figure is shown to a customer or governs a payout, a quorum or deterministic check is required.
 
-| Famille (Cellules) | 1er modèle appelé (moins cher correct en TD 1) | Tableau de bord interne | Chiffre affiché au client | Montant versé (paiement) | Repli si indisponible (HTTP 429 / quota) |
+| Family (Cells) | First Model Called (cheapest correct in TD 1) | Internal Dashboard | Figure Shown to Customer | Amount Paid Out (Payout) | Fallback if Unavailable (HTTP 429 / Quota) |
 |---|---|---|---|---|---|
-| **F1** (`C01, C04, C05, C06, C07, C20`) | `cohere/north-mini-code:free` (OpenRouter, gratuit — 6/6) | **none** (100 % TD 1 + faible enjeu) | **quorum 2-of-3** + exécution lecture seule | **quorum 3-of-5** + référence / revue | `dots-studio/dots-3-note-preview:free` → `openai/gpt-oss-120b` (Groq) → `defer` ou `abstain` |
-| **F3** (`C03, C12, C13, C14`) | `cohere/north-mini-code:free` (OpenRouter, gratuit — 4/4) | **none** (100 % TD 1 + faible enjeu) | **quorum 2-of-3** + exécution lecture seule | **quorum 3-of-5** + référence / revue | `dots-studio/dots-3-note-preview:free` → `qwen/qwen3.8-27b` → `defer` ou `abstain` |
-| **F2** (`C02, C08, C09, C11`) | `openai/gpt-oss-120b` (Groq, gratuit — 4/4) | **quorum 2-of-3** (les autres gratuits échouent sur F2) | **quorum 3-of-5** | **quorum 3-of-5** + revue humaine / référence | Abonnement (`claude-sonnet-5#claude`) → `defer` si `can_wait` → API payante (`openai/gpt-oss-120b#openrouter`) → `abstain` |
-| **F2b** (`C10`) | `openai/gpt-oss-120b` (Groq, gratuit — 1/1) | **quorum 2-of-3** (1 seul cas en TD 1 ; Cohere/Dots/Qwen échouent) | **quorum 3-of-5** | **quorum 3-of-5** + revue humaine / référence | `openai/gpt-oss-20b` (1/1) → abonnement → `defer` → API payante → `abstain` |
-| **Combinaisons** (`C15, C16, C17, C18, C19`) | `openai/gpt-oss-20b` (5/5) ou `claude-sonnet-5#claude` (abonnement G2) | **quorum 2-of-3** (`gpt-oss-120b` échoue sur `C19`, autres gratuits ≤ 40 %) | **quorum 3-of-5** + vérification SQL | **quorum 3-of-5** + revue humaine + référence | `defer` si `can_wait` (attente rechargement) → API payante (`openai/gpt-oss-120b#openrouter`) → `abstain` |
+| **F1** (`C01, C04, C05, C06, C07, C20`) | `cohere/north-mini-code:free` (OpenRouter, free — 6/6) | **none** (100% TD 1 + low stakes) | **2-of-3 quorum** + read-only execution | **3-of-5 quorum** + reference / review | `dots-studio/dots-3-note-preview:free` → `openai/gpt-oss-120b` (Groq) → `defer` or `abstain` |
+| **F3** (`C03, C12, C13, C14`) | `cohere/north-mini-code:free` (OpenRouter, free — 4/4) | **none** (100% TD 1 + low stakes) | **2-of-3 quorum** + read-only execution | **3-of-5 quorum** + reference / review | `dots-studio/dots-3-note-preview:free` → `qwen/qwen3.8-27b` → `defer` or `abstain` |
+| **F2** (`C02, C08, C09, C11`) | `openai/gpt-oss-120b` (Groq, free — 4/4) | **2-of-3 quorum** (other free models fail on F2) | **3-of-5 quorum** | **3-of-5 quorum** + human review / reference | Subscription (`claude-sonnet-5#claude`) → `defer` if `can_wait` → paid API (`openai/gpt-oss-120b#openrouter`) → `abstain` |
+| **F2b** (`C10`) | `openai/gpt-oss-120b` (Groq, free — 1/1) | **2-of-3 quorum** (only 1 case in TD 1; Cohere/Dots/Qwen fail) | **3-of-5 quorum** | **3-of-5 quorum** + human review / reference | `openai/gpt-oss-20b` (1/1) → subscription → `defer` → paid API → `abstain` |
+| **Combinations** (`C15, C16, C17, C18, C19`) | `openai/gpt-oss-20b` (5/5) or `claude-sonnet-5#claude` (G2 subscription) | **2-of-3 quorum** (`gpt-oss-120b` fails on `C19`, other free models ≤ 40%) | **3-of-5 quorum** + SQL check | **3-of-5 quorum** + human review + reference | `defer` if `can_wait` (wait for refill) → paid API (`openai/gpt-oss-120b#openrouter`) → `abstain` |
 
 ---
 
-## 3. Sorties du simulateur (`kit-td1/atelier-routage.py`)
+## 3. Simulator Outputs (`kit-td1/atelier-routage.py`)
 
-### Avant adaptation (`python atelier-routage.py`)
+### Before Adaptation (`python3 atelier-routage.py`)
 ```json
 {"scenario": "simple", "nature": "simulation", "request": {"difficulty": 1, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "small-free", "cash": 0, "checks": "read-only execution and value check", "reason": "eligible included capacity"}}
 {"scenario": "complex", "nature": "simulation", "request": {"difficulty": 3, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "senior-subscription", "cash": 0, "checks": "read-only execution and value check", "reason": "eligible included capacity"}}
@@ -42,7 +42,7 @@ Sources : `td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json`
 {"scenario": "unknown capability", "nature": "simulation", "request": {"difficulty": 4, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "abstain", "resource": null, "cash": 0, "checks": "read-only execution and value check", "reason": "no eligible resource within deadline and budget"}}
 ```
 
-### Après adaptation (`kit-td1/atelier-routage.py` avec `RESOURCES` et `choose` adaptés)
+### After Adaptation (`kit-td1/atelier-routage.py` with adapted `RESOURCES` and `choose`)
 ```json
 {"scenario": "simple", "nature": "simulation", "request": {"difficulty": 1, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "cohere/north-mini-code:free", "cash": 0, "checks": "none (100% TD1 on F1/F3 for internal dashboard) or read-only value check", "reason": "eligible included capacity [F1 6/6 (C01,C04-C07,C20), F3 4/4 (C03,C12-C14)]"}}
 {"scenario": "complex", "nature": "simulation", "request": {"difficulty": 3, "high_impact": false, "can_wait": true, "deadline_minutes": 120, "budget": 0.3}, "result": {"action": "run", "resource": "claude-sonnet-5#claude", "cash": 0, "checks": "quorum 2-of-3 + read-only SQL execution", "reason": "eligible included capacity [G2 subscription fallback for Combinaisons (C15-C19 where free models fail)]"}}
@@ -55,9 +55,9 @@ Sources : `td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json`
 
 ---
 
-## 4. Analyse de l'ordre de priorité dans `choose`
+## 4. Priority Order Analysis in `choose`
 
-1. **Pourquoi une ressource d'abonnement immédiatement disponible (`cash == 0`, `allocation > 0`) est choisie avant de différer (`defer`) sur une ressource gratuite épuisée (`cash == 0`, `allocation == 0`) dont le rechargement a lieu avant `deadline_minutes` :**  
-   Dans `choose`, le premier filtre `included = [r for r in eligible if r["available"] and r["cash"] == 0]` regroupe toutes les ressources disponibles sans dépense directe (`cash == 0`), sans séparer les routes gratuites (`allocation == 0`) des abonnements (`allocation > 0`). Dès que `included` est non vide, la fonction exécute un `return` immédiat (`"action": "run"`) et n'évalue jamais le bloc `waiting` qui gère le `defer`.
-2. **Condition opérationnelle pour inverser cette priorité :**  
-   Cette priorité doit être inversée lorsque le quota d'abonnement (`allocation > 0`) est une **ressource rare à préserver pour des requêtes urgentes ou complexes** (`can_wait=False`, fort enjeu) et que la requête courante **peut attendre** (`can_wait=True`) le rechargement d'une route gratuite (`allocation == 0`) prévu avant `deadline_minutes`. Dans ce cas, différer la requête non urgente évite de consommer inutilement l'enveloppe d'abonnement.
+1. **Why an immediately available subscription resource (`cash == 0`, `allocation > 0`) is selected before deferring (`defer`) to wait for an exhausted free resource (`cash == 0`, `allocation == 0`) whose refill occurs before `deadline_minutes`:**  
+   In `choose`, the first filter `included = [r for r in eligible if r["available"] and r["cash"] == 0]` groups all available resources with no direct cash spend (`cash == 0`), without separating free routes (`allocation == 0`) from subscriptions (`allocation > 0`). As soon as `included` is non-empty, the function returns `"action": "run"` immediately and never evaluates the `waiting` block that handles `defer`.
+2. **Operational condition to reverse this priority:**  
+   This priority should be reversed when the subscription quota (`allocation > 0`) is a **scarce resource to preserve for urgent or high-stakes requests** (`can_wait=False`, high impact) and the current request **can wait** (`can_wait=True`) for a free route (`allocation == 0`) to refill before `deadline_minutes`. Deferring non-urgent requests avoids burning limited subscription allowance unnecessarily.
