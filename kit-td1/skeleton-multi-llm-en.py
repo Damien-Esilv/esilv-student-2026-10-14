@@ -627,7 +627,51 @@ class Orchestrateur:
         families, and look in your traces for a case where several models agree
         on a wrong value.
         """
-        raise NotImplementedError("vote_k_sur_n: to implement in TD 2 (see the procedure in the docstring).")
+        n = len(traces_question)
+        if not (isinstance(k, int) and (n // 2) < k <= n):
+            raise ValueError(f"k must be a strict majority: {n // 2} < k <= {n}, got {k}")
+
+        seen_models = set()
+        for item in traces_question:
+            provider = getattr(item, "provider", None) if not isinstance(item, dict) else item.get("provider")
+            model = getattr(item, "model_requested", None) if not isinstance(item, dict) else item.get("model_requested")
+            key = (provider, model)
+            if key in seen_models:
+                raise ValueError(f"Duplicate proposal from the same provider and model pair: {key}")
+            seen_models.add(key)
+
+        from collections import defaultdict
+        votes_by_value = defaultdict(list)
+
+        for item in traces_question:
+            provider = getattr(item, "provider", None) if not isinstance(item, dict) else item.get("provider")
+            model = getattr(item, "model_requested", None) if not isinstance(item, dict) else item.get("model_requested")
+            verdict = getattr(item, "verdict", None) if not isinstance(item, dict) else item.get("verdict")
+            val = getattr(item, "value", None) if not isinstance(item, dict) else item.get("value")
+
+            if verdict == "executed" and val is not None and not isinstance(val, bool):
+                try:
+                    val = int(val)
+                except (ValueError, TypeError):
+                    continue
+                votes_by_value[val].append(f"{provider}:{model}")
+
+        max_votes = 0
+        winner_val = None
+        winner_models = []
+
+        for val, models in votes_by_value.items():
+            count = len(models)
+            if count > max_votes:
+                max_votes = count
+            if count >= k:
+                winner_val = val
+                winner_models = models
+
+        if winner_val is not None:
+            return {"consensus": True, "value": winner_val,"votes": len(winner_models),"models": winner_models,}
+        else:
+            return {"consensus": False,"value": None,"votes": max_votes,"models": [],}
 
 
 # ==========================================================================

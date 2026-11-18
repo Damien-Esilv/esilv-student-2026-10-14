@@ -15,11 +15,21 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
-PANEL = [
+PANEL_3 = [
     ("groq", "openai/gpt-oss-120b"),
     ("openrouter", "cohere/north-mini-code:free"),
     ("groq", "qwen/qwen3.8-27b"),
 ]
+
+PANEL_5 = [
+    ("groq", "openai/gpt-oss-120b"),
+    ("openrouter", "cohere/north-mini-code:free"),
+    ("groq", "qwen/qwen3.8-27b"),
+    ("groq", "openai/gpt-oss-20b"),
+    ("openrouter", "dots-studio/dots-3-note-preview:free"),
+]
+
+PANEL = PANEL_3
 
 
 def load_vote():
@@ -30,7 +40,7 @@ def load_vote():
     return lambda proposals, k: module.Orchestrateur.vote_k_sur_n(None, proposals, k)
 
 
-def proposals_for(rows, case, nature):
+def proposals_for(rows, case, nature, panel=PANEL_3):
     """Fixed panel: an unavailable member keeps its place but casts no vote.
 
     The last CSV row per panel member is its last attempt. Use one chronological
@@ -40,10 +50,10 @@ def proposals_for(rows, case, nature):
     selected = {}
     for row in rows:
         key = (row["provider"], row["model_requested"])
-        if row["case_id"] == case and row["nature"] == nature and key in PANEL:
+        if row["case_id"] == case and row["nature"] == nature and key in panel:
             selected[key] = row
     proposals = []
-    for provider, model in PANEL:
+    for provider, model in panel:
         row = selected.get((provider, model), {})
         value = row.get("value", "")
         valid = row.get("verdict") in {"correct", "incorrect"} and value not in {None, ""}
@@ -53,8 +63,8 @@ def proposals_for(rows, case, nature):
     return proposals
 
 
-def evaluate(vote, proposals, reference=None):
-    result = vote(proposals, 2)
+def evaluate(vote, proposals, k=2, reference=None):
+    result = vote(proposals, k)
     required = {"consensus", "value", "votes", "models"}
     if not isinstance(result, dict) or not required <= result.keys():
         raise ValueError("Return consensus, value, votes and models as specified in TD2.")
@@ -67,22 +77,29 @@ def evaluate(vote, proposals, reference=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--traces", type=Path)
-    parser.add_argument("--case", default="C01")
+    parser.add_argument("--case", default="C01", help="Case ID (e.g. C01, C02, or 'all')")
     parser.add_argument("--nature", choices=["real", "replay", "simulation"], default="real")
+    parser.add_argument("--panel", type=int, choices=[3, 5], default=3, help="Panel size: 3 or 5 (default: 3)")
+    parser.add_argument("--k", type=int, default=None, help="Strict majority threshold k (default: n // 2 + 1)")
     args = parser.parse_args()
     vote = load_vote()
+    panel = PANEL_5 if args.panel == 5 else PANEL_3
+    n = len(panel)
+    k = args.k if args.k is not None else (n // 2 + 1)
     try:
         if args.traces:
             with args.traces.open(encoding="utf-8", newline="") as handle:
                 rows = list(csv.DictReader(handle))
-            relevant = [r for r in rows if r["case_id"] == args.case and r["nature"] == args.nature]
-            if not relevant:
-                raise ValueError("No rows for this case and nature.")
-            refs = {int(r["reference"]) for r in relevant if r.get("reference") not in {None, ""}}
-            if len(refs) > 1:
-                raise ValueError("Conflicting references: check the experiment before voting.")
-            result = evaluate(vote, proposals_for(rows, args.case, args.nature), next(iter(refs), None))
-            print(json.dumps({"case": args.case, "nature": args.nature, "n": 3, "k": 2, **result}))
+            cases = [f"C{i:02d}" for i in range(1, 21)] if args.case.lower() == "all" else [args.case]
+            for case_id in cases:
+                relevant = [r for r in rows if r["case_id"] == case_id and r["nature"] == args.nature]
+                if not relevant:
+                    raise ValueError(f"No rows for case {case_id} and nature {args.nature}.")
+                refs = {int(r["reference"]) for r in relevant if r.get("reference") not in {None, ""}}
+                if len(refs) > 1:
+                    raise ValueError(f"Conflicting references for {case_id}: check the experiment before voting.")
+                result = evaluate(vote, proposals_for(rows, case_id, args.nature, panel=panel), k=k, reference=next(iter(refs), None))
+                print(json.dumps({"case": case_id, "nature": args.nature, "n": n, "k": k, **result}))
         else:
             # Synthetic values in cents. These are not results on the shop data.
             for name, values, reference in [
@@ -93,9 +110,9 @@ def main():
             ]:
                 proposals = [SimpleNamespace(provider=p, model_requested=m, value=v,
                                              verdict="executed" if v is not None else "error")
-                             for (p, m), v in zip(PANEL, values)]
+                             for (p, m), v in zip(PANEL_3, values)]
                 print(json.dumps({"example": name, "nature": "simulation", "n": 3, "k": 2,
-                                  **evaluate(vote, proposals, reference)}))
+                                  **evaluate(vote, proposals, k=2, reference=reference)}))
     except (NotImplementedError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
         return 2
