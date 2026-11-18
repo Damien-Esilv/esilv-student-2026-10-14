@@ -1,6 +1,5 @@
 # TD1 trace analysis
 
-AI-assisted analysis of the retained TD1 batches, 21 October 2026.
 No additional model calls were made for this analysis. References were computed
 locally using SQL; peer and instructor validation is still pending.
 
