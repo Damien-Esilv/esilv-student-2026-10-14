@@ -1,71 +1,110 @@
 # Rapport TD 2 — Quorum et règle de routage
-
-> **Dépôt** : `reports/td2.md`  
-> **Sous-groupe** : Binôme A (Étape 1) · Binôme B (Étape 2) · Binôme C (Étape 3)
-
----
-
 ## Étape 1 — Vote *k*-sur-*n* (Binôme A)
 
-### 1.1 Contrat et implémentation de `vote_k_sur_n`
+### 1.1 Completed Method
 
-La méthode `Orchestrateur.vote_k_sur_n(self, traces_question, k)` a été implémentée dans [`kit-td1/skeleton-multi-llm-en.py`](file:///c:/Users/gerva/Desktop/esilv-student-2026-10-14/kit-td1/skeleton-multi-llm-en.py#L606-L658) conformément au contrat du TD 2 :
+def vote_k_sur_n(self, traces_question: list, k: int):
+        """TD 2 contract. `traces_question` holds the proposals of the panel for one
+        question, as built by `atelier-vote.py`. Each proposal carries `provider`,
+        `model_requested`, `value` (integer cents or None) and `verdict`
+        (`executed` or `error`). No reference is passed in: the vote decides
+        first, the comparison with your reference comes after.
 
-1. **Seules les propositions exécutées votent** : seuls les éléments avec `verdict == "executed"` et une valeur entière non nulle (`value is not None`) participent au vote. Les erreurs (`sql_invalid`, `not_executed`, `access_error`, HTTP 429) et indisponibilités restent comptabilisées dans le dénominateur $n$ mais n'émettent aucune voix.
-2. **Majorité stricte** : $k$ doit vérifier $\lfloor n / 2 \rfloor < k \le n$, sous peine de lever une `ValueError`.
-3. **Refus des doublons** : deux propositions issues de la même paire `(provider, model_requested)` sont rejetées avec une `ValueError` (un doublon ne constitue pas un second vote).
-4. **Décision avec consensus** : si une valeur atteint au moins $k$ voix, la méthode retourne :
-   ```json
-   {"consensus": true, "value": v, "votes": nombre, "models": ["provider:model", ...]}
-   ```
-5. **Abstention sans invention** : si aucune valeur n'atteint $k$ voix, la méthode retourne :
-   ```json
-   {"consensus": false, "value": null, "votes": plus_grand_nombre_de_voix, "models": []}
-   ```
-   La méthode n'invente jamais de valeur.
-6. **Étanchéité vis-à-vis de la référence** : la référence de vérité terrain n'est jamais fournie à la méthode de vote ; l'évaluation de la conformité intervient strictement après que la décision a été scellée.
+          1. Only executed proposals that carry a value vote. An error or an
+             unavailable member stays in n and casts no vote.
+          2. k is a strict majority: n // 2 < k <= n, otherwise raise ValueError.
+          3. Two proposals with the same (provider, model_requested) are refused
+             with a ValueError: a duplicate is not a second vote.
+          4. If a value reaches k votes, return
+             {"consensus": True, "value": v, "votes": count, "models": [...]}
+             where models lists "provider:model_requested" of the agreeing
+             members.
+          5. Otherwise return {"consensus": False, "value": None,
+             "votes": largest count, "models": []}. Never invent a value.
 
-L'exercice du vote est validé par `kit-td1/atelier-vote.py` :
-- Sur les 4 exemples synthétiques hors-réseau (`agreement`, `disagreement`, `unavailable`, `wrong consensus`).
-- Sur les traces réelles de TD 1 (`traces-td1.csv`) avec le panel fixe 2-sur-3 (`--panel 3`) et le quorum complet 3-sur-5 (`--panel 5`).
+        Seen in lecture 2: models trained on close data are wrong together, so a
+        consensus is not a proof of correctness. Keep the panel to distinct model
+        families, and look in your traces for a case where several models agree
+        on a wrong value.
+        """
+        n = len(traces_question)
+        if not (isinstance(k, int) and (n // 2) < k <= n):
+            raise ValueError(f"k must be a strict majority: {n // 2} < k <= {n}, got {k}")
 
----
+        seen_models = set()
+        for item in traces_question:
+            provider = getattr(item, "provider", None) if not isinstance(item, dict) else item.get("provider")
+            model = getattr(item, "model_requested", None) if not isinstance(item, dict) else item.get("model_requested")
+            key = (provider, model)
+            if key in seen_models:
+                raise ValueError(f"Duplicate proposal from the same provider and model pair: {key}")
+            seen_models.add(key)
 
-### 1.2 Tableau comparatif des 20 questions (`C01` à `C20`) : 2-sur-3 vs 3-sur-5
+        from collections import defaultdict
+        votes_by_value = defaultdict(list)
 
-* **Panel fixe 2-sur-3 ($n=3, k=2$)** : `openai/gpt-oss-120b` (Groq), `cohere/north-mini-code:free` (OpenRouter), `qwen/qwen3.8-27b` (Groq).
-* **Quorum complet 3-sur-5 ($n=5, k=3$)** : les 3 modèles précédents + `openai/gpt-oss-20b` (Groq) + `dots-studio/dots-3-note-preview:free` (OpenRouter).
+        for item in traces_question:
+            provider = getattr(item, "provider", None) if not isinstance(item, dict) else item.get("provider")
+            model = getattr(item, "model_requested", None) if not isinstance(item, dict) else item.get("model_requested")
+            verdict = getattr(item, "verdict", None) if not isinstance(item, dict) else item.get("verdict")
+            val = getattr(item, "value", None) if not isinstance(item, dict) else item.get("value")
 
-| Cas | Famille | Référence (cents) | Décision 2-sur-3 | Valeur 2/3 (cents) | Voix 2/3 | Conforme 2/3 ? | Décision 3-sur-5 | Valeur 3/5 (cents) | Voix 3/5 | Conforme 3/5 ? | Changement de décision / Écart observé |
-|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
-| **C01** | F1 (Période) | 792 800 | Consensus | 792 800 | 3/3 | Conforme | Consensus | 792 800 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C02** | F2 (Âge à date) | 590 320 | Consensus | 590 320 | 2/3 | Conforme | Consensus | 590 320 | 3/5 | Conforme | Marge décalée : 2/3 $\to$ 3/5 (Cohere & GPT-20b retournent 0 ; Dots vote 590 320) |
-| **C03** | F3 (Produit + Période) | 936 350 | Consensus | 936 350 | 3/3 | Conforme | Consensus | 936 350 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C04** | F1 (Période) | 2 826 250 | Consensus | 2 826 250 | 3/3 | Conforme | Consensus | 2 826 250 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C05** | F1 (Période 1j) | 38 480 | Consensus | 38 480 | 3/3 | Conforme | Consensus | 38 480 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C06** | F1 (Période vide) | 0 | Consensus | 0 | 3/3 | Conforme | Consensus | 0 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5 ; `COALESCE` correct sur ensemble vide) |
-| **C07** | F1 (Période 1j) | 13 970 | Consensus | 13 970 | 3/3 | Conforme | Consensus | 13 970 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C08** | F2 (Âge à date) | 605 580 | **Consensus** | **605 580** | **2/3** | **Conforme** | **Abstention** | **None** | **2/5** | **None** | **CHANGEMENT MAJEUR : Consensus $\to$ Abstention** (GPT-20b et Dots dispersent sur 25 920 et 523 000) |
-| **C09** | F2 (Âge à date) | 487 980 | Consensus | 487 980 | 2/3 | Conforme | Consensus | 487 980 | 3/5 | Conforme | Marge décalée : 2/3 $\to$ 3/5 (Qwen retourne 0, GPT-20b sécurise la 3e voix) |
-| **C10** | F2b (Âge commande) | 558 980 | Abstention | None | 1/3 | None | Abstention | None | 2/5 | None | Double abstention ; 2 erreurs SQL en 2/3 (Cohere syntaxe, Qwen jointure) |
-| **C11** | F2 (Âge à date) | 446 690 | Consensus | 446 690 | 2/3 | Conforme | Consensus | 446 690 | 3/5 | Conforme | Marge décalée : 2/3 $\to$ 3/5 (Cohere et GPT-20b échouent ; Dots vote 446 690) |
-| **C12** | F3 (Produits) | 1 666 490 | Consensus | 1 666 490 | 3/3 | Conforme | Consensus | 1 666 490 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C13** | F3 (Produit + Période) | 107 740 | Consensus | 107 740 | 3/3 | Conforme | Consensus | 107 740 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C14** | F3 (Période vide) | 0 | Consensus | 0 | 3/3 | Conforme | Consensus | 0 | 5/5 | Conforme | Identique (Unanimité 3/3 $\to$ 5/5) |
-| **C15** | Combinaison | 168 680 | Abstention | None | 1/3 | None | Abstention | None | 2/5 | None | Double abstention ; dispersion multiple (168 680 a 2 voix < k=3) |
-| **C16** | Combinaison | 376 740 | Consensus | 376 740 | 3/3 | Conforme | Consensus | 376 740 | 4/5 | Conforme | Marge décalée : 3/3 $\to$ 4/5 (Dots échoue à 211 260) |
-| **C17** | Combinaison | 258 180 | Abstention | None | 1/3 | None | Abstention | None | 2/5 | None | Double abstention ; Dots en erreur syntaxe SQL (`near "AS"`) |
-| **C18** | Combinaison | 62 480 | Consensus | 62 480 | 3/3 | Conforme | Consensus | 62 480 | 4/5 | Conforme | Marge décalée : 3/3 $\to$ 4/5 (Dots échoue à 39 580) |
-| **C19** | Combinaison | 1 990 | Abstention | None | 1/3 | None | Abstention | None | 2/5 | None | Double abstention ; le panel 2/3 échoue totalement ; GPT-20b et Dots ont 1 990 (2 < 3) |
-| **C20** | F1 (Période) | 1 106 090 | Consensus | 1 106 090 | 2/3 | Conforme | Consensus | 1 106 090 | 4/5 | Conforme | Marge décalée : 2/3 $\to$ 4/5 ; **Tolérance aux pannes** : Qwen en HTTP 429 |
+            if verdict == "executed" and val is not None and not isinstance(val, bool):
+                try:
+                    val = int(val)
+                except (ValueError, TypeError):
+                    continue
+                votes_by_value[val].append(f"{provider}:{model}")
 
----
+        max_votes = 0
+        winner_val = None
+        winner_models = []
+
+        for val, models in votes_by_value.items():
+            count = len(models)
+            if count > max_votes:
+                max_votes = count
+            if count >= k:
+                winner_val = val
+                winner_models = models
+
+        if winner_val is not None:
+            return {"consensus": True, "value": winner_val,"votes": len(winner_models),"models": winner_models,}
+        else:
+            return {"consensus": False,"value": None,"votes": max_votes,"models": [],}
+
+### 1.2 Comparison table : 2-3 vs 3-5
+
+* **Fixed panel 2-3 ($n=3, k=2$)** : `openai/gpt-oss-120b` (Groq), `cohere/north-mini-code:free` (OpenRouter), `qwen/qwen3.8-27b` (Groq).
+* **Quorum 3-5 ($n=5, k=3$)** : 3 last models + `openai/gpt-oss-20b` (Groq) + `dots-studio/dots-3-note-preview:free` (OpenRouter).
+
+| Case | 2-of-3 Decision | 2/3 Votes | 2/3 Compliant? | 3-of-5 Decision | 3/5 Votes | 3/5 Compliant? | Decision Change / Observed Deviation |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| **C01** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C02** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 $\to$ 3/5 (Cohere & GPT-20b return 0; Dots votes 590,320) |
+| **C03** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C04** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C05** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C06** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5; correct `COALESCE` on empty set) |
+| **C07** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C08** | **Consensus** | **2/3** | **Compliant** | **Abstention** | **2/5** | **None** | **MAJOR CHANGE: Consensus $\to$ Abstention** (GPT-20b and Dots diverge on 25,920 and 523,000) |
+| **C09** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 $\to$ 3/5 (Qwen returns 0; GPT-20b secures the 3rd vote) |
+| **C10** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; 2 SQL errors in 2/3 (Cohere syntax, Qwen join) |
+| **C11** | Consensus | 2/3 | Compliant | Consensus | 3/5 | Compliant | Shifted margin: 2/3 $\to$ 3/5 (Cohere and GPT-20b fail; Dots votes 446,690) |
+| **C12** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C13** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C14** | Consensus | 3/3 | Compliant | Consensus | 5/5 | Compliant | Unchanged (Unanimity 3/3 $\to$ 5/5) |
+| **C15** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; multiple dispersion (168,680 gets 2 votes < k=3) |
+| **C16** | Consensus | 3/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 3/3 $\to$ 4/5 (Dots fails at 211,260) |
+| **C17** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; Dots SQL syntax error (`near "AS"`) |
+| **C18** | Consensus | 3/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 3/3 $\to$ 4/5 (Dots fails at 39,580) |
+| **C19** | Abstention | 1/3 | None | Abstention | 2/5 | None | Double abstention; 2/3 panel fails completely; GPT-20b and Dots have 1,990 (2 < 3) |
+| **C20** | Consensus | 2/3 | Compliant | Consensus | 4/5 | Compliant | Shifted margin: 2/3 $\to$ 4/5; **Fault tolerance**: Qwen hit HTTP 429 |
 
 ### 1.3 Analyse détaillée des écarts et enseignements
 
 1. **Le cas de bascule C08 (Consensus transformé en Abstention) :**
    - *Question* : chiffre d'affaires des clients ayant 25 ans révolus au 2026-09-24.
-   - *Référence* : `605 580` cents.
    - *Traces exactes* : `gpt-120b` = 605 580 (correct), `cohere` = 1 188 090 (incorrect), `qwen` = 605 580 (correct), `gpt-20b` = 25 920 (incorrect), `dots-3` = 523 000 (incorrect).
    - *Mécanisme* : Dans le panel 2-sur-3, `gpt-120b` et `qwen` s'accordent sur la borne de date correcte, atteignant le seuil $k=2$. En passant à 5 modèles, les deux modèles ajoutés (`gpt-20b` et `dots-3`) échouent tous deux sur le calcul d'âge et renvoient des valeurs erronées différentes. La valeur exacte `605 580` ne rassemble que 2 voix sur 5, ce qui est strictement inférieur au seuil requis $k=3$. Le quorum 3-sur-5 **s'abstient**.
    - *Enseignement* : Élargir un quorum à des modèles de moindre capacité augmente le risque de dispersion des voix sur des conditions temporelles complexes. Le quorum 3-sur-5 privilégie la prudence et la sécurité au détriment de la disponibilité.
@@ -87,107 +126,7 @@ L'exercice du vote est validé par `kit-td1/atelier-vote.py` :
 
 ## Étape 2 — Faux consensus SQL (Binôme B)
 
-
-### Cas étudié et résultats
-
-C02 demande le chiffre d'affaires HT, en centimes, de **toutes les commandes des clients ayant exactement 25 ans le 25 septembre 2026**. Le cas provient de notre lot TD 1 du 21 octobre 2026, dont les traces sont étiquetées `real`. Les requêtes conservées ont été réexécutées localement sur `data/boutique.sqlite`, sans nouvel appel aux modèles.
-
-La référence C02 de [reference-td1.csv](../kit-td1/reference-td1.csv) vaut **590 320 centimes**. Les cinq réponses retenues sont :
-
-| Fournisseur et modèle | Valeur en centimes | Verdict | Trace source dans td1/raw-traces |
-|---|---:|---|---|
-| Groq / openai/gpt-oss-120b | 590 320 | correct | traces-gpt120b-C01-C20.csv |
-| OpenRouter / cohere/north-mini-code:free | 0 | incorrect | traces-C.csv |
-| Groq / qwen/qwen3.8-27b | 590 320 | correct | traces-D.csv |
-| Groq / openai/gpt-oss-20b | 0 | incorrect | traces-gpt20b-C01-C20.csv |
-| OpenRouter / dots-studio/dots-3-note-preview:free | 590 320 | correct | traces-E.csv |
-
-Ces cinq cellules C02 figurent dans [traces-td1.csv](../kit-td1/traces-td1.csv). Pour Dots, nous retenons le lot principal `traces-E.csv`, conformément au [tableau de comparaison TD 1](../td1/model-question-comparison-en.csv).
-
-GPT-OSS 20B et Cohere partagent donc la même valeur erronée, **0**, avec un écart de **590 320 centimes** par rapport à la référence.
-
-### Requêtes SQL et causes des erreurs
-
-**GPT-OSS 20B** — cellule `groq:openai/gpt-oss-20b:C02`, tentative 1, dans [traces-gpt20b-C01-C20.csv](../td1/raw-traces/traces-gpt20b-C01-C20.csv). Requête originale :
-
-```sql
-SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
-FROM orders o
-JOIN customers c ON o.customer_id = c.customer_id
-JOIN product p ON o.product_id = p.product_id
-WHERE c.birth_date > '2025-09-25' AND c.birth_date <= '2026-09-25';
-```
-
-Le filtre sélectionne des personnes nées dans l'année précédant le 25 septembre 2026, au lieu de clients âgés de 25 ans. La fenêtre correcte est **`2000-09-25 < birth_date <= 2001-09-25`** : la borne gauche exclut les personnes ayant déjà 26 ans, tandis que la borne droite inclut celles qui fêtent leurs 25 ans ce jour-là. Aucun client ne satisfait le filtre erroné. La requête s'exécute sans erreur, mais `COALESCE` transforme la somme vide en **0**.
-
-**Cohere** — cellule `openrouter:cohere/north-mini-code:free:C02`, tentative 1, dans [traces-C.csv](../td1/raw-traces/traces-C.csv). Requête originale :
-
-```sql
-SELECT COALESCE(SUM(o.quantity_product * p.price), 0) AS revenue_cents
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-JOIN product p ON o.product_id = p.product_id
-WHERE c.birth_date <= '2026-09-25' AND c.birth_date > date('2026-09-25', '-26 years')
-AND c.birth_date <= date('2026-09-25', '-25 years') AND c.birth_date > date('2026-09-25', '-26 years')
-AND o.date >= '2026-09-25 00:00:00' AND o.date < '2027-09-25 00:00:00';
-```
-
-Le filtre d'âge est correct, malgré des conditions répétées. L'erreur est l'ajout des deux restrictions sur `o.date` : C02 demande **toutes les commandes**, sans cette période. La dernière commande de la base date du **20 septembre 2026 à 19:24:25**, donc aucune commande ne satisfait la période ajoutée. La requête retourne elle aussi **0**.
-
-Les deux modèles donnent la même mauvaise valeur pour **deux causes différentes** : une mauvaise fenêtre de naissance et une mauvaise période de commandes.
-
-### Diagnostic SQL et contrôle indépendant
-
-Les deux requêtes erronées ne retiennent aucune ligne. Les montants oubliés correspondent donc à toutes les commandes des clients correctement sélectionnés par l'âge. Le [diagnostic suivant](../td2/B-consensus/diagnostic-c02.sql), exécuté sur `kit-td1/data/boutique.sqlite`, liste ces clients et leur chiffre d'affaires HT :
-
-```sql
-SELECT c.customer_id,
-       c.birth_date,
-       SUM(o.quantity_product * p.price) AS revenue_cents
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-JOIN product p ON o.product_id = p.product_id
-WHERE c.birth_date > '2000-09-25'
-  AND c.birth_date <= '2001-09-25'
-GROUP BY c.customer_id, c.birth_date
-ORDER BY c.customer_id;
-```
-
-| Client | Date de naissance | Montant oublié par chaque modèle en centimes |
-|---|---|---:|
-| C001 | 2001-09-25 | 135 000 |
-| C002 | 2001-09-24 | 25 920 |
-| C005 | 2000-09-26 | 150 240 |
-| C007 | 2000-11-30 | 118 740 |
-| C008 | 2001-05-15 | 99 090 |
-| C009 | 2001-03-10 | 61 330 |
-| **Total** | | **590 320** |
-
-Ces six clients expliquent exactement l'écart pour chacun des deux modèles : **590 320 - 0 = 590 320 centimes**. Aucune ligne n'est ajoutée à tort par les deux requêtes ; toutes les différences sont des omissions.
-
-**Contrôle indépendant :** un calcul Python sur `customers.csv`, `orders.csv` et `product.csv`, sans exécuter de SQL, retrouve les mêmes montants par client et le même total. Il calcule l'âge par différence des années, corrigée selon que l'anniversaire est passé ou non, puis additionne `quantité × prix` sur toutes les commandes des clients âgés de 25 ans.
-
-### Quorums et vérification avec le binôme A
-
-Le décompte est effectué sur les réponses conservées, sans exclure les valeurs marquées `incorrect`. La référence sert à évaluer la décision après le vote.
-
-| Panel déclaré | Seuil | Voix pour 590 320 | Voix pour 0 | Décision confirmée avec le code de A |
-|---|---:|---:|---:|---|
-| GPT-OSS 120B, Cohere, Qwen | 2 sur 3 | 2 | 1 | Consensus à 590 320, correct |
-| Les cinq modèles du tableau ci-dessus | 3 sur 5 | 3 | 2 | Consensus à 590 320, correct |
-
-Dans le panel 2 sur 3, GPT-OSS 120B et Qwen donnent la bonne valeur. Dans le quorum 3 sur 5, Dots apporte une troisième voix à cette valeur. **L'accord erroné entre GPT-OSS 20B et Cohere est donc battu dans les deux configurations.** Le passage de 2 sur 3 à 3 sur 5 ne change pas la valeur retenue sur C02.
-
-**Vérification avec le binôme A effectuée le 18 novembre 2026.** Sa méthode `Orchestrateur.vote_k_sur_n` a été exécutée sur C02 pour les deux panels, à l'aide de son atelier. Depuis `kit-td1`, les commandes sont :
-
-```powershell
-python atelier-vote.py --traces traces-td1.csv --case C02 --panel 3
-python atelier-vote.py --traces traces-td1.csv --case C02 --panel 5
-```
-
-Les résultats obtenus concordent avec le décompte : `consensus: true`, `value: 590320`, `votes: 2` pour le panel 2 sur 3 ; `consensus: true`, `value: 590320`, `votes: 3` pour le quorum 3 sur 5. Dans les deux cas, l'atelier indique `matches_reference: true`. La référence est comparée après la décision et n'est pas transmise à la méthode de vote. **La comparaison entre notre décompte et le code de A est donc terminée pour C02.**
-
-Ce cas montre que deux modèles peuvent s'accorder sur une valeur fausse sans partager la même erreur SQL. Les deux quorums donnent ici la bonne décision, mais leur accord ne garantit pas leur exactitude sur d'autres questions. Le contrôle indépendant des données et des filtres permet de détecter les erreurs et de justifier le montant retenu.
+*(À compléter par le Binôme B : cas identifié dans `traces-td1.csv` ou `DEMO-SQL-C11`, verdict des quorums 2-sur-3 et 3-sur-5, diagnostic des clauses SQL fautives et requête delta sur `data/boutique.sqlite`.)*
 
 ---
 
@@ -195,7 +134,7 @@ Ce cas montre que deux modèles peuvent s'accorder sur une valeur fausse sans pa
 
 ### 3.1 Taux exacts de TD 1 par famille de questions
 
-Sources : `td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json` (lot de 20 questions `C01`–`C20`).
+Sources : `kit-td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json` (lot de 20 questions `C01`–`C20`).
 
 | Famille | Cellules TD 1 | `cohere/north-mini-code:free` | `dots-studio/dots-3-note-preview:free` | `openai/gpt-oss-120b` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` |
 |---|---|---|---|---|---|---|
@@ -260,5 +199,5 @@ Sources : `td1/model-question-comparison-en.csv` et `kit-td1/questions-td1.json`
 ## Contributions et suite
 
 - **Binôme A** : Implémentation du vote strict $k$-sur-$n$ dans `skeleton-multi-llm-en.py`, support multi-panel dans `atelier-vote.py`, tableau comparatif complet 2-sur-3 vs 3-sur-5 sur les 20 questions TD 1, analyse détaillée des écarts (bascule C08, résilience HTTP 429 sur C20, gestion des erreurs SQL C10/C17).
-- **Binôme B** : Analyse du cas C02, identification de l’accord erroné entre GPT-OSS 20B et Cohere, diagnostic des deux requêtes SQL, exécution de la requête delta et contrôle indépendant sur les CSV. Décompte des quorums 2-sur-3 et 3-sur-5, puis vérification avec le code du binôme A.
+- **Binôme B** : *(à compléter)*
 - **Binôme C** : Calcul des taux TD 1 par famille (`F1`, `F2`, `F2b`, `F3`, `Combinaisons`), rédaction de la règle de routage, adaptation de `kit-td1/atelier-routage.py` et analyse de l'ordre de priorité de `choose`.
